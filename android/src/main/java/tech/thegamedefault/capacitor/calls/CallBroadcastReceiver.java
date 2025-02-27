@@ -8,6 +8,9 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 
 import androidx.core.app.ActivityCompat;
 
@@ -26,6 +29,7 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
 
 
     Log.i("CallBroadcastReceiver", "CallBroadcastReceiver " + intent.getAction());
+    
     if (intent.getAction().equals(Intent.ACTION_NEW_OUTGOING_CALL)) {
       //currentPhoneState.setCallActive(true);
       //currentPhoneState.setCallState("OUTGOING_CALL");
@@ -48,6 +52,7 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
             /*if (callState == this.prevState) {
                 return;
             }*/
+      openBackApp(context);
       checkPhoneState(callState, intent);
     }
 
@@ -121,6 +126,30 @@ public class CallBroadcastReceiver extends BroadcastReceiver {
 
     }
   }
+
+private void openBackApp(Context context){
+  
+  Log.e("CallBroadcastReceiver", "CallBroadcastReceiver openBackApp ");
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    Log.e("CallBroadcastReceiver", "CallBroadcastReceiver openBackApp >= Build.VERSION_CODES.M ");
+      if (!Settings.canDrawOverlays(context)) {
+        Log.e("CallBroadcastReceiver", "CallBroadcastReceiver openBackApp !Settings.canDrawOverlays(context) ");
+          Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                  Uri.parse("package:" + context.getPackageName()));
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          context.startActivity(intent);
+      }else{
+       Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.xerintel.univial2007");
+            if (launchIntent != null) {
+              launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              context.startActivity(launchIntent);
+            } else {
+              Log.e("CallBroadcastReceiver", "App not installed");
+            }
+  }
+}
+}
+
 
   private void openApp(Context context) {
     Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.xerintel.univial2007");
